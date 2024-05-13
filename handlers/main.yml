@@ -1,0 +1,7 @@
+# handlers file for kib
+---
+- name: Reload Kibana service
+  systemd:
+     name: kibana
+     state: reloaded
+

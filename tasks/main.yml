@@ -1,0 +1,61 @@
+---
+- name: Check if Kibana  is installed
+  ansible.builtin.stat:
+    path: /usr/share/kibana/kibana-7.10.2-linux-aarch64/bin/kibana
+  register: kibana_installed
+
+- name: Install Elasticsearch if not already installed
+  when: kibana_installed.stat.exists == false
+  block:
+
+     - name: Download Kibana tarball
+       ansible.builtin.get_url:
+          url: "https://artifacts.elastic.co/downloads/kibana/kibana-7.10.2-linux-aarch64.tar.gz"
+          dest: "/tmp/kibana-7.10.2-linux-aarch64.tar.gz"
+
+     - name: Ensure Kibana directory exists
+       ansible.builtin.file:
+          path: "/usr/share/kibana"
+          state: directory
+          owner: ubuntu
+          group: ubuntu
+          mode: "0755"
+
+     - name: Extract Kibana archive
+       ansible.builtin.unarchive:
+          src: "/tmp/kibana-7.10.2-linux-aarch64.tar.gz"
+          dest: "/usr/share/kibana"
+          remote_src: yes
+
+     - name: Set permissions for Kibana directory
+       ansible.builtin.file:
+          path: "/usr/share/kibana"
+          owner: ubuntu
+          group: ubuntu
+          mode: "0755"
+          recurse: yes
+
+
+     - name: Deploy Kibana systemd service file
+       ansible.builtin.template:
+          src: kibana.service.j2
+          dest: /etc/systemd/system/kibana.service
+
+     - name: Set permissions for Kibana service file
+       ansible.builtin.file:
+          path: /etc/systemd/system/kibana.service
+          owner: root
+          group: root
+          mode: "0644"
+
+- name: Configure Kibana  yml file
+  template:
+    src: kibana.yml.j2    
+    dest: "{{ kibana_config_path }}"
+  tags: config
+
+- name: Start Kibana service
+  ansible.builtin.systemd:
+    name: kibana
+    state: started
+    enabled: yes

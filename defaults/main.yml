@@ -1,0 +1,9 @@
+---
+# defaults file for kib
+
+kibana_config_path: /usr/share/kibana/kibana-7.10.2-linux-aarch64/config/kibana.yml
+
+server_port: 5601
+server_host: "{{ main_ip }}"
+elasticsearch_host: "http://{{ main_ip }}:9200"
+

@@ -1,0 +1,15 @@
+[Unit]
+Description=Kibana
+After=network.target
+
+[Service]
+Environment="NODE_OPTIONS=--max-old-space-size=3072"
+ExecStart=/usr/share/kibana/kibana-7.10.2-linux-aarch64/bin/kibana
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/usr/share/kibana
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
